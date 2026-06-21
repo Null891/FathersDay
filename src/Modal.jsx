@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 
 export default function Modal({ quote, onClose }) {
   const [visible, setVisible] = useState(false)
+  const containerRef = useRef(null)
 
   const handleClose = useCallback(() => {
     setVisible(false)
@@ -13,17 +14,26 @@ export default function Modal({ quote, onClose }) {
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 10)
     
+    // Force focus onto our modal container so the browser doesn't lose keyboard 
+    // focus when exiting pointer lock.
+    if (containerRef.current) {
+      containerRef.current.focus()
+    }
+    
     const handleKeyDown = (e) => {
       if (['Escape', ' ', 'Enter'].includes(e.key)) {
         e.preventDefault()
+        e.stopPropagation()
         handleClose()
       }
     }
-    window.addEventListener('keydown', handleKeyDown)
+    
+    // Listening on window is fine, but focus is required to receive keys at all.
+    window.addEventListener('keydown', handleKeyDown, true) // use capture phase to guarantee interception
     
     return () => {
       clearTimeout(t)
-      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keydown', handleKeyDown, true)
     }
   }, [handleClose])
 
@@ -31,12 +41,13 @@ export default function Modal({ quote, onClose }) {
 
   const backdrop = {
     position: 'fixed', inset: 0, zIndex: 60,
-    background: 'rgba(10, 10, 15, 0.7)', // Darker, richer backdrop
-    backdropFilter: 'blur(8px)',
-    WebkitBackdropFilter: 'blur(8px)',
+    background: 'rgba(10, 10, 15, 0.75)', // Darker, richer backdrop
+    backdropFilter: 'blur(12px)', // Increased blur for better aesthetics
+    WebkitBackdropFilter: 'blur(12px)',
     transition: 'opacity 0.3s ease-in-out',
     opacity: visible ? 1 : 0,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
+    outline: 'none', // hide focus ring
   }
 
   const card = {
@@ -56,7 +67,12 @@ export default function Modal({ quote, onClose }) {
   }
 
   return (
-    <div style={backdrop} onClick={handleClose}>
+    <div 
+      ref={containerRef} 
+      tabIndex={-1} 
+      style={backdrop} 
+      onClick={handleClose}
+    >
       <div style={card} onClick={(e) => e.stopPropagation()}>
         
         {/* Top Gold Bar */}
