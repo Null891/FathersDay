@@ -17,5 +17,19 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // React Three Fiber's model is to mutate three.js objects (camera,
+      // materials, geometry attributes) inside useFrame/useEffect and to seed
+      // geometry with Math.random in useMemo. The v7 experimental hooks rules
+      // flag all of that as "impure"/"immutable" — false positives here.
+      'react-hooks/immutability': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+    },
+  },
+  {
+    // One-off Node helper script (CommonJS).
+    files: ['update-photos.js', 'scripts/**'],
+    languageOptions: { globals: globals.node },
   },
 ])

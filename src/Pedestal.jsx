@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { Html } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 
 const letter = [
   {
@@ -16,10 +18,22 @@ const letter = [
 ]
 
 export default function Pedestal({ position }) {
+  const glow = useRef()
+  const ring = useRef()
+  const cap  = useRef()
+
+  // Slow "breathing" aura — the light and emissive trims pulse in sympathy.
+  useFrame(({ clock }) => {
+    const p = (Math.sin(clock.elapsedTime * 1.1) + 1) / 2 // 0..1
+    if (glow.current) glow.current.intensity = 8 + p * 6
+    if (ring.current) ring.current.emissiveIntensity = 1.4 + p * 1.6
+    if (cap.current)  cap.current.emissiveIntensity  = 1.6 + p * 1.0
+  })
+
   return (
     <group position={position}>
       {/* Purple glow from the pedestal */}
-      <pointLight position={[0, 1.2, 0]} intensity={10} distance={7} decay={2} color="#a78bfa" />
+      <pointLight ref={glow} position={[0, 1.2, 0]} intensity={10} distance={7} decay={2} color="#a78bfa" />
 
       {/* Shaft */}
       <mesh position={[0, 0.5, 0]} castShadow>
@@ -37,6 +51,7 @@ export default function Pedestal({ position }) {
       <mesh position={[0, 1.04, 0]}>
         <cylinderGeometry args={[0.2, 0.12, 0.06, 40]} />
         <meshStandardMaterial
+          ref={cap}
           color="#0f0720"
           emissive="#a78bfa"
           emissiveIntensity={2}
@@ -49,6 +64,7 @@ export default function Pedestal({ position }) {
       <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.2, 0.32, 64]} />
         <meshStandardMaterial
+          ref={ring}
           color="#7c3aed"
           emissive="#7c3aed"
           emissiveIntensity={2}

@@ -11,100 +11,117 @@ export default function Modal({ quote, onClose }) {
 
   const handleClose = () => {
     setVisible(false)
-    setTimeout(onClose, 220)
+    setTimeout(onClose, 300) // Slightly longer for smoother exit
   }
+
+  const { text, date } = quote || { text: 'No caption yet — add one in src/photos.js', date: "Father's Day · 2026" }
 
   const backdrop = {
     position: 'fixed', inset: 0, zIndex: 60,
-    background: 'rgba(0,0,0,0.55)',
-    transition: 'opacity 0.22s ease',
+    background: 'rgba(10, 10, 15, 0.7)', // Darker, richer backdrop
+    backdropFilter: 'blur(8px)',
+    WebkitBackdropFilter: 'blur(8px)',
+    transition: 'opacity 0.3s ease-in-out',
     opacity: visible ? 1 : 0,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   }
 
   const card = {
     position: 'relative',
-    width: '480px',
+    width: '520px',
     maxWidth: 'calc(100vw - 48px)',
-    background: 'rgba(13, 8, 28, 0.78)',
-    backdropFilter: 'blur(32px)',
-    WebkitBackdropFilter: 'blur(32px)',
-    border: '1px solid rgba(255,255,255,0.10)',
-    borderRadius: '22px',
-    padding: '40px 44px 36px',
-    boxShadow: '0 32px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.07)',
-    transition: 'opacity 0.22s ease, transform 0.22s ease',
+    background: 'linear-gradient(145deg, rgba(30, 25, 20, 0.9), rgba(15, 12, 10, 0.95))', // Warm dark gradient
+    border: '1px solid rgba(212, 175, 55, 0.3)', // Gold tint border
+    borderRadius: '16px', // Slightly sharper corners for a framed look
+    padding: '48px 56px 40px',
+    boxShadow: '0 30px 60px -12px rgba(0,0,0,0.85), 0 0 70px rgba(212,175,55,0.12), inset 0 1px 0 rgba(255,255,255,0.1)',
+    transition: 'opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
     opacity: visible ? 1 : 0,
-    transform: visible ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.96)',
+    transform: visible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
     fontFamily: 'system-ui, sans-serif',
-    color: 'rgba(255,255,255,0.85)',
+    color: 'rgba(255, 255, 255, 0.9)',
   }
 
   return (
     <div style={backdrop} onClick={handleClose}>
-      {/* Stop click-through on the card itself */}
       <div style={card} onClick={(e) => e.stopPropagation()}>
+        
+        {/* Top Gold Bar */}
+        <div style={{
+          position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+          width: '40%', height: '3px', background: 'linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.8), transparent)',
+          borderBottomLeftRadius: '4px', borderBottomRightRadius: '4px'
+        }} />
 
         {/* Header row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
-          <span style={{
-            fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
-            color: 'rgba(167,139,250,0.75)', fontWeight: 500,
-          }}>
-            A Memory
-          </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#D4AF37', boxShadow: '0 0 10px rgba(212, 175, 55, 0.6)' }} />
+             <span style={{
+               fontSize: '11px', letterSpacing: '0.25em', textTransform: 'uppercase',
+               color: 'rgba(212, 175, 55, 0.9)', fontWeight: 600,
+             }}>
+               Cherished Memory
+             </span>
+          </div>
           <button
             onClick={handleClose}
             style={{
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)',
-              borderRadius: '50%', width: '30px', height: '30px',
+              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '50%', width: '32px', height: '32px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'rgba(255,255,255,0.5)',
-              fontSize: '14px', lineHeight: 1,
-              transition: 'background 0.15s, color 0.15s',
+              cursor: 'pointer', color: 'rgba(255,255,255,0.7)',
+              fontSize: '16px', lineHeight: 1,
+              transition: 'all 0.2s ease',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#fff' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212, 175, 55, 0.2)'; e.currentTarget.style.color = '#D4AF37'; e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.5)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
           >
             ✕
           </button>
         </div>
 
-        {/* Divider */}
-        <div style={{
-          height: '1px',
-          background: 'linear-gradient(to right, rgba(167,139,250,0.4), transparent)',
-          marginBottom: '28px',
-        }} />
-
         {/* Quote mark */}
-        <div style={{ fontSize: '48px', lineHeight: 1, color: 'rgba(167,139,250,0.25)', marginBottom: '8px', fontFamily: 'Georgia, serif' }}>
+        <div style={{ 
+          fontSize: '64px', lineHeight: 0.8, color: 'rgba(212, 175, 55, 0.3)', 
+          fontFamily: 'Georgia, serif', marginBottom: '16px' 
+        }}>
           ❝
         </div>
 
         {/* Caption */}
         <p style={{
-          margin: 0,
-          fontSize: '16px',
-          lineHeight: '1.75',
-          color: quote ? 'rgba(255,255,255,0.80)' : 'rgba(255,255,255,0.25)',
-          fontFamily: 'Georgia, Times New Roman, serif',
-          fontStyle: quote ? 'normal' : 'italic',
-          letterSpacing: '0.01em',
-          minHeight: '60px',
+          margin: '0 0 24px 0',
+          fontSize: '18px',
+          lineHeight: '1.8',
+          color: text ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.3)',
+          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontStyle: text ? 'normal' : 'italic',
+          letterSpacing: '0.02em',
+          minHeight: '80px',
+          fontWeight: 300,
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)'
         }}>
-          {quote || 'No caption yet — add one in src/photos.js'}
+          {text || 'A beautiful moment captured in time.'}
         </p>
 
         {/* Footer */}
         <div style={{
-          marginTop: '32px',
-          paddingTop: '18px',
-          borderTop: '1px solid rgba(255,255,255,0.07)',
-          display: 'flex', justifyContent: 'flex-end',
+          marginTop: '40px',
+          paddingTop: '20px',
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         }}>
-          <span style={{ fontSize: '11px', letterSpacing: '0.12em', color: 'rgba(167,139,250,0.5)', textTransform: 'uppercase' }}>
-            Father's Day · 2026
+          <div style={{
+            height: '1px', flex: 1, marginRight: '24px',
+            background: 'linear-gradient(to right, transparent, rgba(212, 175, 55, 0.3))'
+          }} />
+          <span style={{ 
+            fontSize: '12px', letterSpacing: '0.15em', 
+            color: 'rgba(212, 175, 55, 0.8)', textTransform: 'uppercase',
+            fontWeight: 500, fontFamily: 'system-ui, sans-serif'
+          }}>
+            {date || "Happy Father's Day"}
           </span>
         </div>
       </div>
