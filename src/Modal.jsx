@@ -1,18 +1,31 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 export default function Modal({ quote, onClose }) {
   const [visible, setVisible] = useState(false)
 
-  // Micro-delay so the CSS transition has a frame to start from
-  useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 10)
-    return () => clearTimeout(t)
-  }, [])
-
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setVisible(false)
     setTimeout(onClose, 300) // Slightly longer for smoother exit
-  }
+  }, [onClose])
+
+  // Micro-delay so the CSS transition has a frame to start from
+  // Also bind keyboard events for fast closing
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 10)
+    
+    const handleKeyDown = (e) => {
+      if (['Escape', ' ', 'Enter'].includes(e.key)) {
+        e.preventDefault()
+        handleClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    
+    return () => {
+      clearTimeout(t)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [handleClose])
 
   const { text, date } = quote || { text: 'No caption yet — add one in src/photos.js', date: "Father's Day · 2026" }
 
