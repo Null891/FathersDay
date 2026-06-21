@@ -1,7 +1,7 @@
 import { Suspense, Fragment } from 'react'
 import Exhibit from './Exhibit'
 import Pedestal from './Pedestal'
-import { PHOTOS } from './photos'
+import { PHOTOS, CAPTIONS } from './photos'
 
 // Hallway dimensions — long enough for all photos, 2 per bay
 const HALL_WIDTH  = 6
@@ -16,9 +16,9 @@ const BAY_SPACING  = 3.5
 const BAY_START_Z  = -3
 const bays = PHOTOS.reduce((acc, src, i) => {
   const bay = Math.floor(i / 2)
-  if (!acc[bay]) acc[bay] = { z: BAY_START_Z - bay * BAY_SPACING, left: null, right: null }
-  if (i % 2 === 0) acc[bay].left  = src
-  else             acc[bay].right = src
+  if (!acc[bay]) acc[bay] = { z: BAY_START_Z - bay * BAY_SPACING, left: null, right: null, leftCaption: '', rightCaption: '' }
+  if (i % 2 === 0) { acc[bay].left = src;  acc[bay].leftCaption  = CAPTIONS[src] ?? '' }
+  else             { acc[bay].right = src; acc[bay].rightCaption = CAPTIONS[src] ?? '' }
   return acc
 }, [])
 
@@ -31,7 +31,7 @@ const lightZs = Array.from(
 const floorMat = { color: '#d1c9be', roughness: 0.4, metalness: 0.1 }
 const wallMat  = { color: '#f0ece6', roughness: 0.8, metalness: 0 }
 
-export default function Museum() {
+export default function Museum({ onExhibitClick }) {
   return (
     <group>
       {/* Lighting */}
@@ -78,23 +78,27 @@ export default function Museum() {
       </mesh>
 
       {/* All photo exhibits */}
-      {bays.map(({ z, left, right }, i) => (
+      {bays.map(({ z, left, right, leftCaption, rightCaption }, i) => (
         <Fragment key={i}>
           {left && (
             <Suspense fallback={null}>
               <Exhibit
-                imageUrl={left}
+                textureUrl={left}
                 position={[-HALL_WIDTH / 2 + 0.1, HALL_HEIGHT / 2, z]}
                 rotation={[0, Math.PI / 2, 0]}
+                quoteText={leftCaption}
+                onQuoteClick={onExhibitClick}
               />
             </Suspense>
           )}
           {right && (
             <Suspense fallback={null}>
               <Exhibit
-                imageUrl={right}
+                textureUrl={right}
                 position={[HALL_WIDTH / 2 - 0.1, HALL_HEIGHT / 2, z]}
                 rotation={[0, -Math.PI / 2, 0]}
+                quoteText={rightCaption}
+                onQuoteClick={onExhibitClick}
               />
             </Suspense>
           )}

@@ -1,10 +1,33 @@
 import { useRef, useState, useEffect } from 'react'
 
-// Drop your mp3 files into /public and update these paths
 const TRACKS = [
-  { title: 'Track One',   src: '/track1.mp3' },
-  { title: 'Track Two',   src: '/track2.mp3' },
-  { title: 'Track Three', src: '/track3.mp3' },
+  { title: 'Faded',                      artist: 'Alan Walker',                    src: '/track01.mp3' },
+  { title: '7 Rings',                     artist: 'Ariana Grande',                  src: '/track02.mp3' },
+  { title: 'Eastside (Acoustic)',          artist: 'benny blanco, Halsey & Khalid',  src: '/track03.mp3' },
+  { title: 'Interstellar Main Theme',      artist: 'Hans Zimmer',                    src: '/track04.mp3' },
+  { title: 'A Little Bit Yours',           artist: 'JP Saxe',                        src: '/track05.mp3' },
+  { title: 'Lemon (Cover)',               artist: 'Raon Lee',                       src: '/track06.mp3' },
+  { title: 'Praeludium & Allegro',         artist: 'Kreisler · Ko & Aoki',           src: '/track07.mp3' },
+  { title: 'Fingers Crossed',             artist: 'Lauren Spencer Smith',           src: '/track08.mp3' },
+  { title: 'Flowers',                     artist: 'Lauren Spencer-Smith',           src: '/track09.mp3' },
+  { title: 'Experience',                  artist: 'Ludovico Einaudi',               src: '/track10.mp3' },
+  { title: 'Flowers',                     artist: 'Miley Cyrus',                    src: '/track11.mp3' },
+  { title: 'Midnight Sky',                artist: 'Miley Cyrus',                    src: '/track12.mp3' },
+  { title: 'Can You Hear The Music',      artist: 'Oppenheimer OST · Pietschmann',  src: '/track13.mp3' },
+  { title: 'あぶく',                       artist: 'ヨルシカ',                        src: '/track14.mp3' },
+  { title: '告白氣球 Love Confession',     artist: '周杰倫 Jay Chou',                 src: '/track15.mp3' },
+  { title: '不該',                         artist: '周杰倫 Jay Chou × aMEI',          src: '/track16.mp3' },
+  { title: '尋人啟事',                     artist: 'LaLa 徐佳瑩',                    src: '/track17.mp3' },
+  { title: '最初的記憶',                   artist: 'LaLa 徐佳瑩',                    src: '/track18.mp3' },
+  { title: '你敢不敢',                     artist: 'LaLa 徐佳瑩',                    src: '/track19.mp3' },
+  { title: '不曾回來過',                   artist: '李千娜 Nana Lee',                 src: '/track20.mp3' },
+  { title: '心花開',                       artist: '李千娜 Nana Lee',                 src: '/track21.mp3' },
+  { title: '愛到站了',                     artist: '李千娜 Nana Lee',                 src: '/track22.mp3' },
+  { title: '打勾勾',                       artist: '李千娜 Nana Lee',                 src: '/track23.mp3' },
+  { title: '說實話',                       artist: '李千娜 Nana Lee',                 src: '/track24.mp3' },
+  { title: 'Lemon',                       artist: '米津玄師 Kenshi Yonezu',           src: '/track25.mp3' },
+  { title: 'IRIS OUT',                    artist: '米津玄師 Kenshi Yonezu',           src: '/track26.mp3' },
+  { title: 'ピースサイン (Peace Sign)',    artist: '米津玄師 Kenshi Yonezu',           src: '/track27.mp3' },
 ]
 
 function fmt(s) {
@@ -50,27 +73,15 @@ export default function MusicPlayer() {
   const [progress,  setProgress]  = useState(0)
   const [duration,  setDuration]  = useState(0)
 
-  // Boot audio instance once
   useEffect(() => {
     const a = new Audio()
     audioRef.current = a
-
-    a.addEventListener('timeupdate',    () => setProgress(a.currentTime))
-    a.addEventListener('loadedmetadata',() => setDuration(a.duration || 0))
-    a.addEventListener('ended', () => {
-      const next = (playingRef.current, setCurrent(c => {
-        const n = (c + 1) % TRACKS.length
-        return n
-      }))
-    })
-
-    return () => {
-      a.pause()
-      a.src = ''
-    }
+    a.addEventListener('timeupdate',     () => setProgress(a.currentTime))
+    a.addEventListener('loadedmetadata', () => setDuration(a.duration || 0))
+    a.addEventListener('ended',          () => setCurrent(c => (c + 1) % TRACKS.length))
+    return () => { a.pause(); a.src = '' }
   }, [])
 
-  // Swap track
   useEffect(() => {
     const a = audioRef.current
     if (!a) return
@@ -87,13 +98,10 @@ export default function MusicPlayer() {
     const a = audioRef.current
     if (!a) return
     if (playingRef.current) {
-      a.pause()
-      playingRef.current = false
-      setIsPlaying(false)
+      a.pause(); playingRef.current = false; setIsPlaying(false)
     } else {
       a.play().catch(() => { playingRef.current = false; setIsPlaying(false) })
-      playingRef.current = true
-      setIsPlaying(true)
+      playingRef.current = true; setIsPlaying(true)
     }
   }
 
@@ -109,90 +117,78 @@ export default function MusicPlayer() {
   }
 
   const pct = duration ? (progress / duration) * 100 : 0
+  const track = TRACKS[current]
 
   return (
-    <div
-      style={{
-        position:   'fixed',
-        bottom:     '28px',
-        left:       '50%',
-        transform:  'translateX(-50%)',
-        zIndex:     50,
-        width:      '340px',
-        background: 'rgba(15, 10, 30, 0.65)',
-        backdropFilter:         'blur(28px)',
-        WebkitBackdropFilter:   'blur(28px)',
-        border:     '1px solid rgba(255,255,255,0.10)',
-        borderRadius: '20px',
-        padding:    '20px 24px 18px',
-        boxShadow:  '0 8px 40px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)',
-        userSelect: 'none',
-      }}
-    >
-      {/* Track info row */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-        <div>
-          <p style={{ margin: 0, fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.88)', letterSpacing: '0.01em', fontFamily: 'system-ui, sans-serif' }}>
-            {TRACKS[current].title}
+    <div style={{
+      position: 'fixed', bottom: '28px', left: '50%',
+      transform: 'translateX(-50%)', zIndex: 50,
+      width: '360px',
+      background: 'rgba(15, 10, 30, 0.65)',
+      backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)',
+      border: '1px solid rgba(255,255,255,0.10)',
+      borderRadius: '20px', padding: '20px 24px 18px',
+      boxShadow: '0 8px 40px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)',
+      userSelect: 'none',
+    }}>
+      {/* Track info */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+        <div style={{ minWidth: 0, flex: 1, paddingRight: '12px' }}>
+          <p style={{
+            margin: 0, fontSize: '13px', fontWeight: 500,
+            color: 'rgba(255,255,255,0.90)', fontFamily: 'system-ui, sans-serif',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          }}>
+            {track.title}
           </p>
-          <p style={{ margin: 0, fontSize: '11px', color: 'rgba(167,139,250,0.7)', letterSpacing: '0.05em', fontFamily: 'system-ui, sans-serif', marginTop: '2px' }}>
-            Father's Day · 2026
+          <p style={{
+            margin: '3px 0 0', fontSize: '11px', fontFamily: 'system-ui, sans-serif',
+            color: 'rgba(167,139,250,0.7)', letterSpacing: '0.03em',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          }}>
+            {track.artist}
           </p>
         </div>
-        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', fontFamily: 'system-ui, sans-serif', letterSpacing: '0.08em' }}>
+        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.22)', fontFamily: 'system-ui, sans-serif', letterSpacing: '0.08em', flexShrink: 0, paddingTop: '1px' }}>
           {current + 1}&thinsp;/&thinsp;{TRACKS.length}
         </span>
       </div>
 
       {/* Progress bar */}
-      <div
-        onClick={seek}
-        style={{ height: '3px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', cursor: 'pointer', marginBottom: '6px', position: 'relative' }}
-      >
+      <div onClick={seek} style={{ height: '3px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', cursor: 'pointer', marginBottom: '6px', position: 'relative' }}>
         <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(to right, #7c3aed, #a78bfa)', borderRadius: '999px', transition: 'width 0.1s linear' }} />
         <div style={{ position: 'absolute', top: '50%', left: `${pct}%`, transform: 'translate(-50%, -50%)', width: '10px', height: '10px', borderRadius: '50%', background: '#a78bfa', boxShadow: '0 0 6px #a78bfa' }} />
       </div>
 
       {/* Time */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'system-ui, sans-serif', letterSpacing: '0.05em' }}>{fmt(progress)}</span>
-        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'system-ui, sans-serif', letterSpacing: '0.05em' }}>{fmt(duration)}</span>
+        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.28)', fontFamily: 'system-ui, sans-serif' }}>{fmt(progress)}</span>
+        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.28)', fontFamily: 'system-ui, sans-serif' }}>{fmt(duration)}</span>
       </div>
 
       {/* Controls */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '24px' }}>
-        <button
-          onClick={() => skip(-1)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.45)', padding: '4px', display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}
+        <button onClick={() => skip(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.40)', padding: '4px', display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}
           onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.9)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.45)'}
-        >
+          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.40)'}>
           <IconPrev />
         </button>
 
-        <button
-          onClick={togglePlay}
-          style={{
-            width: '48px', height: '48px', borderRadius: '50%',
-            background: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
-            border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff',
-            boxShadow: '0 0 18px rgba(124,58,237,0.5)',
-            transition: 'transform 0.1s, box-shadow 0.1s',
-          }}
+        <button onClick={togglePlay} style={{
+          width: '48px', height: '48px', borderRadius: '50%',
+          background: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
+          border: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+          boxShadow: '0 0 18px rgba(124,58,237,0.5)', transition: 'transform 0.1s, box-shadow 0.1s',
+        }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.07)'; e.currentTarget.style.boxShadow = '0 0 28px rgba(124,58,237,0.75)' }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)';    e.currentTarget.style.boxShadow = '0 0 18px rgba(124,58,237,0.5)' }}
-        >
+          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)';    e.currentTarget.style.boxShadow = '0 0 18px rgba(124,58,237,0.5)' }}>
           {isPlaying ? <IconPause /> : <IconPlay />}
         </button>
 
-        <button
-          onClick={() => skip(1)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.45)', padding: '4px', display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}
+        <button onClick={() => skip(1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.40)', padding: '4px', display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}
           onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.9)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.45)'}
-        >
+          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.40)'}>
           <IconNext />
         </button>
       </div>
