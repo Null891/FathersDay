@@ -16,9 +16,10 @@ export default function Effects({ room = false }) {
   const caOffset = useMemo(() => new THREE.Vector2(0.0009, 0.0009), [])
 
   return (
-    // HalfFloat frame buffer → 16-bit precision kills the concentric colour
-    // banding that 8-bit buffers produce across the dark dome gradient.
-    <EffectComposer multisampling={4} disableNormalPass frameBufferType={THREE.HalfFloatType}>
+    // NOTE: do not set frameBufferType=HalfFloat together with multisampling —
+    // that combo fails on some GPUs and blanks the whole canvas. The raised
+    // bloom threshold below keeps the dome banding in check instead.
+    <EffectComposer multisampling={4} disableNormalPass>
       <Bloom
         intensity={room ? 0.95 : 0.55}
         luminanceThreshold={room ? 0.45 : 0.55}
