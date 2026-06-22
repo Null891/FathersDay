@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
+import confetti from 'canvas-confetti'
 import Museum from './Museum'
 import Player from './Player'
+import Checkpoint from './Checkpoint'
+import GrandRoom from './GrandRoom'
 import MusicPlayer from './MusicPlayer'
 import Modal from './Modal'
 import LoadingScreen from './LoadingScreen'
@@ -11,7 +14,11 @@ export default function App() {
   const [activeQuote, setActiveQuote] = useState(null)
   const [locked, setLocked]   = useState(false)
   const [entered, setEntered] = useState(false)
+  const [scene, setScene]     = useState('tunnel') // 'tunnel' | 'room'
+  const [flash, setFlash]     = useState(false)     // transition light-burst
+  const [roomHint, setRoomHint] = useState(false)
   const musicRef = useRef(null)
+  const confettiFired = useRef(false)
 
   useEffect(() => {
     const onChange = () => setLocked(!!document.pointerLockElement)
@@ -24,6 +31,30 @@ export default function App() {
     musicRef.current?.play() // start the soundtrack on the entry gesture
   }
 
+  // One-shot celebration confetti — only ever fires the first time the room opens.
+  const fireConfetti = () => {
+    if (confettiFired.current) return
+    confettiFired.current = true
+    const colors = ['#a78bfa', '#d4af37', '#f3ead2', '#ff9ec4', '#7c3aed']
+    const burst = (opts) => confetti({ disableForReducedMotion: true, colors, ...opts })
+    burst({ particleCount: 90, spread: 78, startVelocity: 46, origin: { x: 0.5, y: 0.62 } })
+    setTimeout(() => burst({ particleCount: 55, angle: 60, spread: 60, origin: { x: 0, y: 0.7 } }), 160)
+    setTimeout(() => burst({ particleCount: 55, angle: 120, spread: 60, origin: { x: 1, y: 0.7 } }), 320)
+  }
+
+  // Tunnel → Grand Room: burst of light hides the scene swap.
+  const goToRoom = () => {
+    if (scene !== 'tunnel') return
+    document.exitPointerLock?.()
+    setFlash(true)
+    setTimeout(() => { setScene('room'); setRoomHint(true) }, 520) // swap at the peak
+    setTimeout(() => setFlash(false), 1150)
+    setTimeout(() => fireConfetti(), 900)                          // after the flash fades
+    setTimeout(() => setRoomHint(false), 6500)
+  }
+
+  const inTunnel = scene === 'tunnel'
+
   return (
     <div className="w-screen h-screen block">
       <Canvas
@@ -32,17 +63,34 @@ export default function App() {
         dpr={[1, 2]}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
       >
-        <color attach="background" args={['#0a0a10']} />
-        <fog attach="fog" args={['#0a0a10', 8, 60]} />
+        {inTunnel ? (
+          <>
+            <color attach="background" args={['#0a0a10']} />
+            <fog attach="fog" args={['#0a0a10', 8, 60]} />
+          </>
+        ) : (
+          <>
+            <color attach="background" args={['#161226']} />
+            <fog attach="fog" args={['#1b1631', 14, 46]} />
+          </>
+        )}
+
         <Suspense fallback={null}>
-          <Player enabled={entered} />
-          <Museum onExhibitClick={setActiveQuote} />
+          {inTunnel && (
+            <>
+              <Player enabled={entered} />
+              <Museum onExhibitClick={setActiveQuote} />
+              <Checkpoint onTrigger={goToRoom} active={entered} />
+            </>
+          )}
+          {scene === 'room' && <GrandRoom />}
         </Suspense>
-        <Effects />
+
+        <Effects room={!inTunnel} />
       </Canvas>
 
-      {/* Crosshair — only while the pointer is locked */}
-      {entered && locked && (
+      {/* Crosshair — only in the tunnel while the pointer is locked */}
+      {entered && inTunnel && locked && (
         <div style={{
           position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
           pointerEvents: 'none', zIndex: 40, color: 'rgba(255,255,255,0.6)',
@@ -52,8 +100,8 @@ export default function App() {
         </div>
       )}
 
-      {/* "Click to look" hint when the cursor is free post-entry */}
-      {entered && !locked && (
+      {/* "Click to look" hint when the cursor is free in the tunnel */}
+      {entered && inTunnel && !locked && (
         <div style={{
           position: 'fixed', top: '22px', left: '50%', transform: 'translateX(-50%)',
           pointerEvents: 'none', zIndex: 40,
@@ -67,6 +115,22 @@ export default function App() {
         </div>
       )}
 
+      {/* Room look hint — fades out after a few seconds */}
+      {scene === 'room' && (
+        <div style={{
+          position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)',
+          pointerEvents: 'none', zIndex: 40,
+          padding: '9px 20px', borderRadius: '999px',
+          background: 'rgba(20,14,38,0.55)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(167,139,250,0.22)',
+          fontSize: '11px', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.6)',
+          fontFamily: 'system-ui, sans-serif', textTransform: 'uppercase',
+          opacity: roomHint ? 1 : 0, transition: 'opacity 1s ease',
+        }}>
+          Drag to look around
+        </div>
+      )}
+
       <MusicPlayer ref={musicRef} enabled={entered} />
 
       {activeQuote !== null && (
@@ -74,6 +138,18 @@ export default function App() {
       )}
 
       {!entered && <LoadingScreen onEnter={handleEnter} />}
+
+      {/* Transition light-burst */}
+      {flash && (
+        <>
+          <style>{`@keyframes fd-burst { 0% { opacity: 0 } 40% { opacity: 1 } 58% { opacity: 1 } 100% { opacity: 0 } }`}</style>
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 90, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse at 50% 50%, #fff6e6 0%, #e9ddff 35%, #b794ff 70%, rgba(124,58,237,0) 100%)',
+            animation: 'fd-burst 1.15s ease-in-out forwards',
+          }} />
+        </>
+      )}
     </div>
   )
 }

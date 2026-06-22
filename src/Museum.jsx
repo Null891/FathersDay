@@ -1,7 +1,6 @@
 import { Suspense, Fragment } from 'react'
 import { MeshReflectorMaterial } from '@react-three/drei'
 import Exhibit from './Exhibit'
-import Pedestal from './Pedestal'
 import DustMotes from './DustMotes'
 import { PHOTOS, CAPTIONS, thumbUrl } from './photos'
 import { HALL_WIDTH, HALL_HEIGHT, HALL_LENGTH, CENTER_Z, BACK_Z, FRONT_Z } from './constants'
@@ -119,9 +118,6 @@ export default function Museum({ onExhibitClick }) {
           )}
         </Fragment>
       ))}
-
-      {/* Letter pedestal at the end */}
-      <Pedestal position={[0, 0, BACK_Z + 4]} />
     </group>
   )
 }
