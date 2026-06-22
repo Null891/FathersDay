@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { EffectComposer, Bloom, DepthOfField, Vignette, BrightnessContrast, HueSaturation, ChromaticAberration } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Vignette, BrightnessContrast, HueSaturation, ChromaticAberration } from '@react-three/postprocessing'
 import * as THREE from 'three'
 
 // Post-processing stack — scene-aware: tunnel vs. grand room have different grades.
@@ -21,20 +21,12 @@ export default function Effects({ room = false }) {
     // bloom threshold below keeps the dome banding in check instead.
     <EffectComposer multisampling={4} disableNormalPass>
       <Bloom
-        intensity={room ? 0.95 : 0.55}
-        luminanceThreshold={room ? 0.45 : 0.55}
-        luminanceSmoothing={room ? 0.28 : 0.32}
+        intensity={room ? 0.55 : 0.55}
+        luminanceThreshold={room ? 0.52 : 0.55}
+        luminanceSmoothing={room ? 0.25 : 0.32}
         mipmapBlur
-        radius={room ? 0.70 : 0.70}
+        radius={room ? 0.55 : 0.70}
       />
-      {room && (
-        <DepthOfField
-          focusDistance={0.12}
-          focalLength={0.018}
-          bokehScale={2.2}
-          height={480}
-        />
-      )}
       <BrightnessContrast brightness={0.0} contrast={0.09} />
       <HueSaturation saturation={0.07} />
       <Vignette offset={room ? 0.35 : 0.32} darkness={room ? 0.60 : 0.62} eskil={false} />

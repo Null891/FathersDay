@@ -303,7 +303,7 @@ function Dome() {
         <meshStandardMaterial
           color="#2a1f44"
           emissive="#6040b0"
-          emissiveIntensity={0.9}
+          emissiveIntensity={0.3}
           roughness={0.5}
           metalness={0.06}
           side={THREE.DoubleSide}
@@ -318,54 +318,12 @@ function Dome() {
         <meshStandardMaterial
           color="#d4af37"
           emissive="#c8a030"
-          emissiveIntensity={0.5}
+          emissiveIntensity={0.3}
           roughness={0.3}
           metalness={0.4}
           side={THREE.DoubleSide}
         />
       </mesh>
-    </group>
-  )
-}
-
-// ── GodRays3D ─────────────────────────────────────────────────────────────────
-// Seven additive-blended planes radiating from the oculus, slowly rotating.
-// All planes share one material so color only needs updating once per frame.
-// Pure 3D approach — no postprocessing GodRays effect, works with existing Bloom.
-function GodRays3D() {
-  const groupRef  = useRef()
-  const coldColor = useMemo(() => new THREE.Color('#7060b0'), [])
-  const warmColor = useMemo(() => new THREE.Color('#d49010'), [])
-
-  const mat = useMemo(() => new THREE.MeshBasicMaterial({
-    color: '#7060b0',
-    transparent: true,
-    opacity: 0.042,
-    side: THREE.DoubleSide,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    toneMapped: false,
-  }), [])
-
-  useEffect(() => () => mat.dispose(), [mat])
-
-  useFrame(() => {
-    if (groupRef.current) groupRef.current.rotation.y += 0.0014
-    mat.color.lerpColors(coldColor, warmColor, roomState.goldenHourT)
-  })
-
-  return (
-    <group ref={groupRef} position={[0, 18, 0]}>
-      {Array.from({ length: 7 }, (_, i) => {
-        const ry  = (i / 7) * Math.PI * 2
-        const len = 10 + (i % 3) * 4
-        const w   = 0.55 + (i % 2) * 0.65
-        return (
-          <mesh key={i} position={[0, -len / 2, 0]} rotation={[0, ry, 0.10]} material={mat}>
-            <planeGeometry args={[w, len]} />
-          </mesh>
-        )
-      })}
     </group>
   )
 }
@@ -439,7 +397,6 @@ export default function GrandRoom({ musicRef }) {
     <group>
       <RoomLook />
       <AnimatedLighting />
-      <GodRays3D />
       <Dome />
       <StarField />
       <FloorMedallion />
