@@ -115,19 +115,31 @@ export default function App() {
         </div>
       )}
 
-      {/* Room look hint — fades out after a few seconds */}
+      {/* Room look hint — onboarding cues that fade out after a few seconds */}
       {scene === 'room' && (
         <div style={{
-          position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)',
+          position: 'fixed', top: '24px', left: '50%',
+          transform: `translateX(-50%) translateY(${roomHint ? '0' : '-10px'})`,
           pointerEvents: 'none', zIndex: 40,
-          padding: '9px 20px', borderRadius: '999px',
-          background: 'rgba(20,14,38,0.55)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', gap: '13px',
+          padding: '10px 22px', borderRadius: '999px',
+          background: 'rgba(20,14,38,0.55)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
           border: '1px solid rgba(167,139,250,0.22)',
-          fontSize: '11px', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.6)',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.4)',
+          fontSize: '10.5px', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.62)',
           fontFamily: 'system-ui, sans-serif', textTransform: 'uppercase',
-          opacity: roomHint ? 1 : 0, transition: 'opacity 1s ease',
+          opacity: roomHint ? 1 : 0, transition: 'opacity 1s ease, transform 1s ease',
         }}>
-          Drag to look around
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 9l-3 3 3 3M16 9l3 3-3 3M5 12h14" />
+            </svg>
+            Drag to look
+          </span>
+          <span style={{ opacity: 0.3 }}>·</span>
+          <span>Scroll the letters</span>
+          <span style={{ opacity: 0.3 }}>·</span>
+          <span style={{ color: 'rgba(212,175,55,0.9)' }}>Hover the gold words</span>
         </div>
       )}
 

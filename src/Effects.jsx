@@ -16,11 +16,13 @@ export default function Effects({ room = false }) {
   const caOffset = useMemo(() => new THREE.Vector2(0.0009, 0.0009), [])
 
   return (
-    <EffectComposer multisampling={4} disableNormalPass>
+    // HalfFloat frame buffer → 16-bit precision kills the concentric colour
+    // banding that 8-bit buffers produce across the dark dome gradient.
+    <EffectComposer multisampling={4} disableNormalPass frameBufferType={THREE.HalfFloatType}>
       <Bloom
-        intensity={room ? 1.2 : 0.55}
-        luminanceThreshold={room ? 0.30 : 0.55}
-        luminanceSmoothing={room ? 0.40 : 0.32}
+        intensity={room ? 0.95 : 0.55}
+        luminanceThreshold={room ? 0.45 : 0.55}
+        luminanceSmoothing={room ? 0.28 : 0.32}
         mipmapBlur
         radius={room ? 0.70 : 0.70}
       />

@@ -248,10 +248,10 @@ function SeasonalParticles() {
 // A small frosted-glass card positioned in the room (3D space via Html transform),
 // not a flat screen overlay. Writes to roomState.season on click.
 const SEASONS = [
-  { key: 'dust',   label: 'Still Air', icon: '✦' },
-  { key: 'spring', label: 'Spring',    icon: '🌸' },
-  { key: 'autumn', label: 'Autumn',    icon: '🍂' },
-  { key: 'winter', label: 'Winter',    icon: '❄️' },
+  { key: 'dust',   label: 'Still Air', icon: '✦',  dot: '#cdb8ff' },
+  { key: 'spring', label: 'Spring',    icon: '🌸', dot: '#ffb0cc' },
+  { key: 'autumn', label: 'Autumn',    icon: '🍂', dot: '#e08a30' },
+  { key: 'winter', label: 'Winter',    icon: '❄️', dot: '#dbeeff' },
 ]
 
 function SeasonToggle() {
@@ -284,7 +284,7 @@ function SeasonToggle() {
           }}>
             Atmosphere
           </p>
-          {SEASONS.map(({ key, label, icon }) => {
+          {SEASONS.map(({ key, label, icon, dot }) => {
             const isActive = active === key
             return (
               <button
@@ -308,7 +308,14 @@ function SeasonToggle() {
                 onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
               >
                 <span style={{ fontSize: '13px', lineHeight: 1 }}>{icon}</span>
-                <span>{label}</span>
+                <span style={{ flex: 1 }}>{label}</span>
+                {/* Season-colour swatch — glows when active */}
+                <span style={{
+                  width: '7px', height: '7px', borderRadius: '50%', background: dot,
+                  opacity: isActive ? 1 : 0.4,
+                  boxShadow: isActive ? `0 0 8px ${dot}` : 'none',
+                  transition: 'opacity 0.2s, box-shadow 0.2s',
+                }} />
               </button>
             )
           })}
