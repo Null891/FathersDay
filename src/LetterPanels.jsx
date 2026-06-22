@@ -183,6 +183,7 @@ function Panel({ numeral, heading, blocks, position, rotation, delay, panelIndex
   const [textReady, setTextReady] = useState(false)
   const scrollRef   = useRef()
   const progressRef = useRef()
+  const cueRef      = useRef()
 
   const handleUnfoldComplete = useCallback(() => setTextReady(true), [])
 
@@ -199,6 +200,7 @@ function Panel({ numeral, heading, blocks, position, rotation, delay, panelIndex
         roomState.panelScrolls[2]
       ) / 3
       if (progressRef.current) progressRef.current.style.width = `${frac * 100}%`
+      if (cueRef.current) cueRef.current.style.opacity = frac > 0.015 ? '0' : '1'
     }
   }, [panelIndex])
 
@@ -262,6 +264,18 @@ function Panel({ numeral, heading, blocks, position, rotation, delay, panelIndex
           {/* Reading progress bar — filled by onScroll via ref, no React state */}
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', borderRadius: '0 0 14px 14px', background: 'rgba(255,255,255,0.04)', zIndex: 11, overflow: 'hidden', pointerEvents: 'none' }}>
             <div ref={progressRef} style={{ height: '100%', width: '0%', background: 'linear-gradient(to right, rgba(201,162,42,0.5), #d4af37)', borderRadius: '0 0 0 14px', transition: 'width 0.15s ease' }} />
+          </div>
+
+          {/* Scroll cue — fades out once the reader starts scrolling */}
+          <div ref={cueRef} style={{
+            position: 'absolute', bottom: '15px', left: '50%', transform: 'translateX(-50%)',
+            zIndex: 12, pointerEvents: 'none', textAlign: 'center',
+            opacity: textReady ? 1 : 0, transition: 'opacity 0.5s ease',
+          }}>
+            <div style={{ fontSize: '8px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(201,162,42,0.7)', fontFamily: 'system-ui, sans-serif', marginBottom: '3px' }}>Scroll</div>
+            <svg width="16" height="9" viewBox="0 0 16 9" fill="none" style={{ animation: 'fd-scrollcue 1.6s ease-in-out infinite', display: 'block', margin: '0 auto' }}>
+              <path d="M1 1l7 6 7-6" stroke="rgba(201,162,42,0.8)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
         </div>
       </Html>
@@ -331,6 +345,9 @@ export default function LetterPanels() {
           .ink-para.ink-reveal:nth-child(6)  { animation-delay: 0.30s; }
           .ink-para.ink-reveal:nth-child(7)  { animation-delay: 0.36s; }
           .ink-para.ink-reveal:nth-child(n+8){ animation-delay: 0.42s; }
+
+          /* Scroll-cue chevron bounce */
+          @keyframes fd-scrollcue { 0%,100% { transform: translateY(0); opacity: 0.5 } 50% { transform: translateY(4px); opacity: 1 } }
         `}</style>
       </Html>
 

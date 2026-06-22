@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useProgress } from '@react-three/drei'
 
 export default function LoadingScreen({ onEnter }) {
@@ -27,6 +27,16 @@ export default function LoadingScreen({ onEnter }) {
     return () => clearTimeout(t)
   }, [])
 
+  // Ambient particles drifting upward behind the title — pure CSS transforms.
+  const particles = useMemo(() => Array.from({ length: 20 }, () => ({
+    left:  Math.random() * 100,
+    size:  1.5 + Math.random() * 3,
+    delay: -Math.random() * 14,
+    dur:   10 + Math.random() * 10,
+    drift: (Math.random() - 0.5) * 50,
+    op:    0.12 + Math.random() * 0.30,
+  })), [])
+
   const handleEnter = () => {
     if (!ready || leaving) return
     onEnter()                          // fire now, while the click gesture is fresh (unlocks audio)
@@ -52,13 +62,37 @@ export default function LoadingScreen({ onEnter }) {
         opacity: leaving ? 0 : 1,
         transition: 'opacity 0.7s ease',
         userSelect: 'none',
+        overflow: 'hidden',
       }}
     >
       <style>{`
         @keyframes ls-pulse { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
         @keyframes ls-rise  { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+        @keyframes ls-float {
+          0%   { transform: translateY(0)      translateX(0);              opacity: 0; }
+          12%  { opacity: var(--op); }
+          88%  { opacity: var(--op); }
+          100% { transform: translateY(-108vh) translateX(var(--drift));   opacity: 0; }
+        }
+        @keyframes ls-shimmer { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
       `}</style>
 
+      {/* Ambient drifting particles */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+        {particles.map((p, i) => (
+          <span key={i} style={{
+            position: 'absolute', bottom: '-6px', left: `${p.left}%`,
+            width: `${p.size}px`, height: `${p.size}px`, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(212,175,55,0.9), rgba(167,139,250,0.35))',
+            boxShadow: '0 0 6px rgba(212,175,55,0.5)',
+            '--op': p.op, '--drift': `${p.drift}px`,
+            animation: `ls-float ${p.dur}s linear ${p.delay}s infinite`,
+          }} />
+        ))}
+      </div>
+
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       {/* Eyebrow */}
       <p style={{
         fontSize: '11px', letterSpacing: '0.35em', textTransform: 'uppercase',
@@ -71,7 +105,12 @@ export default function LoadingScreen({ onEnter }) {
       <h1 style={{
         fontFamily: 'Georgia, serif', fontWeight: 400,
         fontSize: '40px', letterSpacing: '0.01em',
-        margin: '18px 0 6px', color: 'rgba(255,255,255,0.95)',
+        margin: '18px 0 6px',
+        background: 'linear-gradient(100deg, rgba(255,255,255,0.92) 28%, #f6e7b4 44%, #d4af37 50%, #f6e7b4 56%, rgba(255,255,255,0.92) 72%)',
+        backgroundSize: '220% auto',
+        WebkitBackgroundClip: 'text', backgroundClip: 'text',
+        WebkitTextFillColor: 'transparent', color: 'transparent',
+        animation: 'ls-shimmer 7s linear infinite',
       }}>
         A Gallery of Memories
       </h1>
@@ -116,6 +155,7 @@ export default function LoadingScreen({ onEnter }) {
             </p>
           </div>
         )}
+      </div>
       </div>
     </div>
   )
