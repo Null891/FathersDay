@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useMemo, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import * as THREE from 'three'
@@ -53,6 +53,43 @@ export function WindChimes() {
   })
 
   return null
+}
+
+// ── Pulse Rings ───────────────────────────────────────────────────────────────
+// Concentric rings that expand outward from the base of the gramophone,
+// suggesting sound radiating through the floor.
+function PulseRings() {
+  const ringsRef = useRef([null, null, null])
+  const mats = useMemo(() =>
+    Array.from({ length: 3 }, () => new THREE.MeshBasicMaterial({
+      color: '#e0a020', transparent: true, opacity: 0,
+      side: THREE.DoubleSide, depthWrite: false, toneMapped: false,
+    }))
+  , [])
+
+  useEffect(() => () => mats.forEach(m => m.dispose()), [mats])
+
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime * 0.55
+    mats.forEach((mat, i) => {
+      const phase  = (t + i * 0.333) % 1.0
+      const scale  = 0.25 + phase * 2.8
+      const mesh   = ringsRef.current[i]
+      if (!mesh) return
+      mesh.scale.setScalar(scale)
+      mat.opacity = (1 - phase) * 0.20
+    })
+  })
+
+  return (
+    <group position={[0, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      {mats.map((mat, i) => (
+        <mesh key={i} ref={el => (ringsRef.current[i] = el)} material={mat}>
+          <ringGeometry args={[0.88, 1.0, 36]} />
+        </mesh>
+      ))}
+    </group>
+  )
 }
 
 // ── Material presets ──────────────────────────────────────────────────────────
@@ -155,6 +192,9 @@ export default function Gramophone({ musicRef }) {
           <meshStandardMaterial {...GOLD} />
         </mesh>
       </group>
+
+      {/* ── Pulse rings ─────────────────────────────────────────── */}
+      <PulseRings />
 
       {/* ── Small uplight at base (makes the horn glow) ─────────── */}
       <pointLight

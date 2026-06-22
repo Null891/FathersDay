@@ -23,13 +23,13 @@ const PHOTOS = [
 ].map(f => `/photos/${f}`)
 
 const CAPTION = {
-  'recital':    'First Recital',
-  'belt test':  'Black Belt Test',
-  'usc':        'Going to America',
-  'grandma':    'Dinner with Grandma',
-  'fried rice': 'Taiwanese Kitchen',
-  'desk':       'Clean Desk',
-  'games':      'Game Night',
+  'recital':    { text: 'First Recital',       sub: 'You were there' },
+  'belt test':  { text: 'Black Belt Test',     sub: 'Always cheering' },
+  'usc':        { text: 'Going to America',    sub: 'Built from nothing' },
+  'grandma':    { text: 'Dinner with Grandma', sub: 'Family first' },
+  'fried rice': { text: 'Taiwanese Kitchen',   sub: 'Taste of home' },
+  'desk':       { text: 'Clean Desk',          sub: 'A lesson that stuck' },
+  'games':      { text: 'Game Night',          sub: 'You, as a person' },
 }
 
 function pickRandom(arr) {
@@ -45,6 +45,7 @@ export default function Polaroids() {
     visible: false,
     photo:   PHOTOS[0],
     caption: '',
+    sub:     '',
     tilt:    2,
   })
 
@@ -55,13 +56,14 @@ export default function Polaroids() {
   // Swap photo with a brief fade-out interstitial
   const showKeyword = useCallback((kw) => {
     if (timerRef.current) clearTimeout(timerRef.current)
-    // Fade out first
     setPol(p => ({ ...p, visible: false }))
     timerRef.current = setTimeout(() => {
+      const cap = CAPTION[kw] ?? { text: kw, sub: '' }
       setPol({
         visible: true,
         photo:   pickRandom(PHOTOS),
-        caption: CAPTION[kw] ?? kw,
+        caption: cap.text,
+        sub:     cap.sub,
         tilt:    (Math.random() - 0.5) * 9,
       })
       timerRef.current = null
@@ -91,53 +93,54 @@ export default function Polaroids() {
         <div
           onPointerDown={(e) => e.stopPropagation()}
           style={{
-            width: '210px',
-            background: '#f6f1e8',
+            width: '230px',
+            background: '#f5f0e4',
             borderRadius: '3px',
-            padding: '13px 13px 46px',
-            boxShadow: '0 8px 44px rgba(0,0,0,0.70), 0 2px 8px rgba(0,0,0,0.35)',
+            padding: '14px 14px 50px',
+            boxShadow: '0 12px 48px rgba(0,0,0,0.78), 0 3px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.6)',
             pointerEvents: 'none',
             userSelect: 'none',
-            // CSS-driven entrance: opacity + upward drift
             opacity: pol.visible ? 1 : 0,
             transform: pol.visible
               ? `rotate(${pol.tilt}deg) translateY(0px)`
-              : `rotate(${pol.tilt}deg) translateY(20px)`,
+              : `rotate(${pol.tilt}deg) translateY(22px)`,
             transition: `opacity ${FADE_MS}ms ease, transform ${FADE_MS + 60}ms ease`,
           }}
         >
-          {/* Photo area — square crop */}
-          <div style={{
-            width: '100%',
-            aspectRatio: '1 / 1',
-            overflow: 'hidden',
-            background: '#d8d0c0',
-          }}>
+          {/* Photo area */}
+          <div style={{ width: '100%', aspectRatio: '1/1', overflow: 'hidden', background: '#ccc4b4' }}>
             <img
               src={pol.photo}
               alt={pol.caption}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center 20%',
-                display: 'block',
-              }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', display: 'block' }}
             />
           </div>
 
-          {/* Handwritten-style caption in the white Polaroid border */}
-          <p style={{
-            margin: '10px 0 0',
-            textAlign: 'center',
-            fontFamily: '"Segoe Script", "Comic Sans MS", cursive',
-            fontSize: '13px',
-            color: '#3a2c2c',
-            letterSpacing: '0.01em',
-            lineHeight: 1.4,
-          }}>
-            {pol.caption}
-          </p>
+          {/* Caption block in the white Polaroid border */}
+          <div style={{ marginTop: '10px', textAlign: 'center' }}>
+            <p style={{
+              margin: 0,
+              fontFamily: '"Segoe Script", "Comic Sans MS", cursive',
+              fontSize: '14px',
+              color: '#2e2020',
+              letterSpacing: '0.01em',
+              lineHeight: 1.4,
+            }}>
+              {pol.caption}
+            </p>
+            {pol.sub && (
+              <p style={{
+                margin: '5px 0 0',
+                fontFamily: 'Georgia, serif',
+                fontStyle: 'italic',
+                fontSize: '10px',
+                color: 'rgba(80,60,50,0.65)',
+                letterSpacing: '0.04em',
+              }}>
+                {pol.sub}
+              </p>
+            )}
+          </div>
         </div>
       </Html>
     </group>

@@ -190,6 +190,86 @@ function Columns() {
   )
 }
 
+// ── Star field ────────────────────────────────────────────────────────────────
+// Faint points scattered on the inside of the dome, giving depth to the void.
+function StarField() {
+  const pointsRef = useRef()
+  const { geom, mat } = useMemo(() => {
+    const COUNT = 650
+    const pos   = new Float32Array(COUNT * 3)
+    const sizes = new Float32Array(COUNT)
+    for (let i = 0; i < COUNT; i++) {
+      const theta = Math.random() * Math.PI * 2
+      const phi   = Math.acos(2 * Math.random() - 1)
+      const r     = 17.6
+      pos[i * 3]     = r * Math.sin(phi) * Math.cos(theta)
+      pos[i * 3 + 1] = Math.abs(r * Math.cos(phi)) + 2  // bias above horizon
+      pos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta)
+      sizes[i]        = 0.04 + Math.random() * 0.10
+    }
+    const g = new THREE.BufferGeometry()
+    g.setAttribute('position', new THREE.BufferAttribute(pos,   3))
+    g.setAttribute('size',     new THREE.BufferAttribute(sizes, 1))
+    const m = new THREE.PointsMaterial({
+      color: '#e8e0ff', size: 0.07, transparent: true, opacity: 0.32,
+      toneMapped: false, depthWrite: false, sizeAttenuation: true,
+    })
+    return { geom: g, mat: m }
+  }, [])
+
+  useEffect(() => () => { geom.dispose(); mat.dispose() }, [geom, mat])
+
+  useFrame(({ clock }) => {
+    if (pointsRef.current) mat.opacity = 0.28 + Math.sin(clock.elapsedTime * 0.22) * 0.06
+  })
+
+  return <points ref={pointsRef} args={[geom, mat]} />
+}
+
+// ── Floor Medallion ───────────────────────────────────────────────────────────
+// Decorative gold inlay at the room centre — two rings + 8 spokes + centre dot.
+function FloorMedallion() {
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: '#c9a22a', roughness: 0.20, metalness: 0.88,
+    emissive: '#a07818', emissiveIntensity: 0.14,
+  }), [])
+
+  useEffect(() => () => mat.dispose(), [mat])
+
+  const base = { rotation: [-Math.PI / 2, 0, 0], position: [0, 0.003, 0] }
+  const spokes = useMemo(() =>
+    Array.from({ length: 8 }, (_, i) => {
+      const angle = (i / 8) * Math.PI * 2
+      return { x: Math.cos(angle) * 2.1, y: Math.sin(angle) * 2.1, angle }
+    })
+  , [])
+
+  return (
+    <group position={base.position} rotation={base.rotation}>
+      <mesh material={mat}>
+        <ringGeometry args={[2.82, 3.0, 72]} />
+      </mesh>
+      <mesh material={mat}>
+        <ringGeometry args={[1.40, 1.52, 64]} />
+      </mesh>
+      <mesh material={mat}>
+        <ringGeometry args={[0.52, 0.60, 48]} />
+      </mesh>
+      {spokes.map((s, i) => (
+        <mesh key={i} material={mat} position={[s.x, s.y, 0]} rotation={[0, 0, s.angle]}>
+          <boxGeometry args={[0.055, 1.38, 0.003]} />
+        </mesh>
+      ))}
+      {/* 8 small diamond accents at outer ring */}
+      {spokes.map((s, i) => (
+        <mesh key={`d${i}`} material={mat} position={[Math.cos(s.angle + Math.PI/8) * 2.91, Math.sin(s.angle + Math.PI/8) * 2.91, 0]} rotation={[0, 0, s.angle + Math.PI/4]}>
+          <boxGeometry args={[0.08, 0.08, 0.003]} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
 // ── Dome ──────────────────────────────────────────────────────────────────────
 function Dome() {
   return (
@@ -352,6 +432,8 @@ export default function GrandRoom({ musicRef }) {
       <AnimatedLighting />
       <GodRays3D />
       <Dome />
+      <StarField />
+      <FloorMedallion />
       <RippleFloor />
       <Columns />
       <LetterPanels />

@@ -248,10 +248,10 @@ function SeasonalParticles() {
 // A small frosted-glass card positioned in the room (3D space via Html transform),
 // not a flat screen overlay. Writes to roomState.season on click.
 const SEASONS = [
-  { key: 'dust',   label: 'Still Air' },
-  { key: 'spring', label: 'Spring' },
-  { key: 'autumn', label: 'Autumn' },
-  { key: 'winter', label: 'Winter' },
+  { key: 'dust',   label: 'Still Air', icon: '✦' },
+  { key: 'spring', label: 'Spring',    icon: '🌸' },
+  { key: 'autumn', label: 'Autumn',    icon: '🍂' },
+  { key: 'winter', label: 'Winter',    icon: '❄️' },
 ]
 
 function SeasonToggle() {
@@ -284,14 +284,15 @@ function SeasonToggle() {
           }}>
             Atmosphere
           </p>
-          {SEASONS.map(({ key, label }) => {
+          {SEASONS.map(({ key, label, icon }) => {
             const isActive = active === key
             return (
               <button
                 key={key}
                 onClick={() => choose(key)}
                 style={{
-                  display: 'block', width: '100%', textAlign: 'left',
+                  display: 'flex', alignItems: 'center', gap: '7px',
+                  width: '100%', textAlign: 'left',
                   background: isActive ? 'rgba(201,162,42,0.14)' : 'transparent',
                   border: isActive ? '1px solid rgba(201,162,42,0.42)' : '1px solid transparent',
                   borderRadius: '8px',
@@ -303,10 +304,11 @@ function SeasonToggle() {
                   fontFamily: 'system-ui, sans-serif',
                   transition: 'color 0.2s, background 0.2s, border-color 0.2s',
                 }}
-                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
                 onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
               >
-                {label}
+                <span style={{ fontSize: '13px', lineHeight: 1 }}>{icon}</span>
+                <span>{label}</span>
               </button>
             )
           })}

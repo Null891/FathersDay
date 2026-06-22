@@ -42,10 +42,22 @@ function withKeywords(text) {
           textDecoration: 'underline dotted rgba(212,175,55,0.5)',
           textUnderlineOffset: '3px',
           cursor: 'default',
-          transition: 'color 0.2s',
+          transition: 'color 0.18s, text-shadow 0.18s',
+          borderRadius: '3px',
+          padding: '0 1px',
         }}
-        onMouseEnter={() => { roomState.activeKeyword = kw.toLowerCase() }}
-        onMouseLeave={() => { roomState.activeKeyword = null }}
+        onMouseEnter={(e) => {
+          roomState.activeKeyword = kw.toLowerCase()
+          e.currentTarget.style.color = '#f5d060'
+          e.currentTarget.style.textShadow = '0 0 10px rgba(245,208,96,0.75), 0 0 22px rgba(212,175,55,0.45)'
+          e.currentTarget.style.textDecoration = 'underline solid rgba(245,208,96,0.7)'
+        }}
+        onMouseLeave={(e) => {
+          roomState.activeKeyword = null
+          e.currentTarget.style.color = '#d4af37'
+          e.currentTarget.style.textShadow = ''
+          e.currentTarget.style.textDecoration = 'underline dotted rgba(212,175,55,0.5)'
+        }}
       >
         {part}
       </span>
@@ -169,22 +181,24 @@ function Block({ lang, text }) {
 // ── Panel ─────────────────────────────────────────────────────────────────────
 function Panel({ numeral, heading, blocks, position, rotation, delay, panelIndex }) {
   const [textReady, setTextReady] = useState(false)
-  const scrollRef  = useRef()
+  const scrollRef   = useRef()
+  const progressRef = useRef()
 
   const handleUnfoldComplete = useCallback(() => setTextReady(true), [])
 
-  // Golden-hour scroll tracking — writes to module-level roomState so
-  // useFrame loops in GrandRoom can read it without React re-renders.
+  // Golden-hour scroll tracking + progress bar update (no React re-render needed)
   const onScroll = useCallback((e) => {
     const el = e.currentTarget
     const max = el.scrollHeight - el.clientHeight
     if (max > 0) {
-      roomState.panelScrolls[panelIndex] = el.scrollTop / max
+      const frac = el.scrollTop / max
+      roomState.panelScrolls[panelIndex] = frac
       roomState.scrollProgress = (
         roomState.panelScrolls[0] +
         roomState.panelScrolls[1] +
         roomState.panelScrolls[2]
       ) / 3
+      if (progressRef.current) progressRef.current.style.width = `${frac * 100}%`
     }
   }, [panelIndex])
 
@@ -244,6 +258,11 @@ function Panel({ numeral, heading, blocks, position, rotation, delay, panelIndex
 
           {/* Bottom fade */}
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '52px', zIndex: 10, borderRadius: '0 0 14px 14px', pointerEvents: 'none', background: 'linear-gradient(to bottom, transparent, rgba(10,7,18,0.95))' }} />
+
+          {/* Reading progress bar — filled by onScroll via ref, no React state */}
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', borderRadius: '0 0 14px 14px', background: 'rgba(255,255,255,0.04)', zIndex: 11, overflow: 'hidden', pointerEvents: 'none' }}>
+            <div ref={progressRef} style={{ height: '100%', width: '0%', background: 'linear-gradient(to right, rgba(201,162,42,0.5), #d4af37)', borderRadius: '0 0 0 14px', transition: 'width 0.15s ease' }} />
+          </div>
         </div>
       </Html>
     </group>
@@ -323,6 +342,10 @@ export default function LetterPanels() {
             opacity: headerShown ? 1 : 0, transform: headerShown ? 'none' : 'translateY(-18px)',
             transition: 'opacity 1.4s ease, transform 1.4s ease',
           }}>
+            {/* Wax seal */}
+            <div style={{ width: '52px', height: '52px', borderRadius: '50%', margin: '0 auto 18px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at 35% 32%, #c0392b 0%, #7b0000 100%)', border: '2.5px solid rgba(201,162,42,0.72)', boxShadow: '0 3px 14px rgba(0,0,0,0.55), inset 0 1px 3px rgba(255,255,255,0.12)', userSelect: 'none', pointerEvents: 'none' }}>
+              <span style={{ fontFamily: '"Snell Roundhand","Segoe Script",Georgia,serif', fontStyle: 'italic', fontSize: '24px', color: 'rgba(201,162,42,0.95)', lineHeight: 1 }}>D</span>
+            </div>
             <p style={{ margin: 0, fontSize: '13px', letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(201,162,42,0.85)', fontFamily: 'system-ui, sans-serif' }}>{LETTER_HEADER.date}</p>
             <h1 style={{ margin: '14px 0 4px', fontSize: '44px', fontWeight: 400, color: '#f3ead2', fontFamily: 'Georgia, serif', textShadow: '0 2px 40px rgba(201,162,42,0.45)' }}>{LETTER_HEADER.en}</h1>
             <h2 style={{ margin: 0, fontSize: '30px', fontWeight: 400, color: 'rgba(214,205,255,0.93)', fontFamily: CJK }}>{LETTER_HEADER.zh}</h2>
