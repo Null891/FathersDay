@@ -295,7 +295,7 @@ export default function LetterPanels() {
 
   useFrame(({ clock }) => {
     if (headerRef.current && headerShown)
-      headerRef.current.position.y = 4.7 + Math.sin(clock.elapsedTime * 0.75) * 0.055
+      headerRef.current.position.y = 5.05 + Math.sin(clock.elapsedTime * 0.75) * 0.055
   })
 
   return (
@@ -352,8 +352,8 @@ export default function LetterPanels() {
       </Html>
 
       {/* Floating celebratory header above the centre panel */}
-      <group ref={headerRef} position={[0, 4.7, -6.0]}>
-        <Html transform center distanceFactor={6.2} pointerEvents="none" zIndexRange={[30, 0]}>
+      <group ref={headerRef} position={[0, 5.05, -6.0]}>
+        <Html transform center distanceFactor={5.6} pointerEvents="none" zIndexRange={[30, 0]}>
           <div style={{
             width: '500px', textAlign: 'center', userSelect: 'none', pointerEvents: 'none',
             opacity: headerShown ? 1 : 0, transform: headerShown ? 'none' : 'translateY(-18px)',
@@ -364,8 +364,8 @@ export default function LetterPanels() {
               <span style={{ fontFamily: '"Snell Roundhand","Segoe Script",Georgia,serif', fontStyle: 'italic', fontSize: '24px', color: 'rgba(201,162,42,0.95)', lineHeight: 1 }}>D</span>
             </div>
             <p style={{ margin: 0, fontSize: '13px', letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(201,162,42,0.85)', fontFamily: 'system-ui, sans-serif' }}>{LETTER_HEADER.date}</p>
-            <h1 style={{ margin: '14px 0 4px', fontSize: '44px', fontWeight: 400, color: '#f3ead2', fontFamily: 'Georgia, serif', textShadow: '0 2px 40px rgba(201,162,42,0.45)' }}>{LETTER_HEADER.en}</h1>
-            <h2 style={{ margin: 0, fontSize: '30px', fontWeight: 400, color: 'rgba(214,205,255,0.93)', fontFamily: CJK }}>{LETTER_HEADER.zh}</h2>
+            <h1 style={{ margin: '12px 0 4px', fontSize: '40px', fontWeight: 400, color: '#f3ead2', fontFamily: 'Georgia, serif', textShadow: '0 2px 24px rgba(201,162,42,0.35)' }}>{LETTER_HEADER.en}</h1>
+            <h2 style={{ margin: 0, fontSize: '27px', fontWeight: 400, color: 'rgba(214,205,255,0.93)', fontFamily: CJK }}>{LETTER_HEADER.zh}</h2>
           </div>
         </Html>
       </group>

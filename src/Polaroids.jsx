@@ -93,6 +93,7 @@ export default function Polaroids() {
         <div
           onPointerDown={(e) => e.stopPropagation()}
           style={{
+            position: 'relative',
             width: '230px',
             background: '#f5f0e4',
             borderRadius: '3px',
@@ -107,6 +108,14 @@ export default function Polaroids() {
             transition: `opacity ${FADE_MS}ms ease, transform ${FADE_MS + 60}ms ease`,
           }}
         >
+          {/* Scrapbook washi tape holding the photo to the wall */}
+          <div style={{
+            position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%) rotate(-3deg)',
+            width: '82px', height: '24px',
+            background: 'linear-gradient(135deg, rgba(222,202,150,0.52), rgba(198,176,128,0.40))',
+            borderLeft: '1px solid rgba(255,255,255,0.30)', borderRight: '1px solid rgba(0,0,0,0.10)',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.28)',
+          }} />
           {/* Photo area */}
           <div style={{ width: '100%', aspectRatio: '1/1', overflow: 'hidden', background: '#ccc4b4' }}>
             <img
