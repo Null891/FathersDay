@@ -15,12 +15,14 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 // Damped so movement feels like turning a real head, not snapping.
 function RoomLook() {
   const { camera, gl } = useThree()
-  const s = useRef({ dragging: false, px: 0, py: 0, yaw: 0, pitch: 0, tYaw: 0, tPitch: 0, velYaw: 0, velPitch: 0 })
+  // Start with a gentle upward tilt so the entry view frames the letter panels,
+  // header and dome — not the floor.
+  const s = useRef({ dragging: false, px: 0, py: 0, yaw: 0, pitch: 0.11, tYaw: 0, tPitch: 0.11, velYaw: 0, velPitch: 0 })
 
   useEffect(() => {
     camera.position.set(0, 1.6, 0)
     camera.rotation.order = 'YXZ'
-    camera.rotation.set(0, 0, 0)
+    camera.rotation.set(0.11, 0, 0)
 
     const el = gl.domElement
     const down = (e) => {
@@ -227,45 +229,52 @@ function StarField() {
 }
 
 // ── Floor Medallion ───────────────────────────────────────────────────────────
-// Decorative gold inlay at the room centre — two rings + 8 spokes + centre dot.
+// A subtle inlaid compass rose at the room centre. Deliberately *not* a solid
+// glowing ring — a low emissive lets it glint under the warm uplights and read
+// as antique-gold craftsmanship rather than a neon hoop, and a dotted bezel
+// replaces the heavy outer band that used to dominate the entry view.
 function FloorMedallion() {
   const mat = useMemo(() => new THREE.MeshStandardMaterial({
-    color: '#c9a22a', roughness: 0.20, metalness: 0.88,
-    emissive: '#a07818', emissiveIntensity: 0.14,
+    color: '#9c7d2a', roughness: 0.34, metalness: 0.92,
+    emissive: '#3a2a08', emissiveIntensity: 0.06,
   }), [])
 
   useEffect(() => () => mat.dispose(), [mat])
 
-  const base = { rotation: [-Math.PI / 2, 0, 0], position: [0, 0.003, 0] }
-  const spokes = useMemo(() =>
+  // 8-point star: long cardinal rays alternating with short diagonal rays.
+  const rays = useMemo(() =>
     Array.from({ length: 8 }, (_, i) => {
       const angle = (i / 8) * Math.PI * 2
-      return { x: Math.cos(angle) * 2.1, y: Math.sin(angle) * 2.1, angle }
+      const long  = i % 2 === 0
+      const len   = long ? 2.25 : 1.25
+      const mid   = len / 2 + 0.16             // inner end sits near the centre rosette
+      return { x: Math.cos(angle) * mid, y: Math.sin(angle) * mid, angle, len, w: long ? 0.075 : 0.05 }
+    })
+  , [])
+
+  // Dotted bezel — 16 small diamonds standing in for a solid outer ring.
+  const ticks = useMemo(() =>
+    Array.from({ length: 16 }, (_, i) => {
+      const angle = (i / 16) * Math.PI * 2
+      return { x: Math.cos(angle) * 2.55, y: Math.sin(angle) * 2.55, angle }
     })
   , [])
 
   return (
-    <group position={base.position} rotation={base.rotation}>
-      <mesh material={mat}>
-        <ringGeometry args={[2.82, 3.0, 72]} />
-      </mesh>
-      <mesh material={mat}>
-        <ringGeometry args={[1.40, 1.52, 64]} />
-      </mesh>
-      <mesh material={mat}>
-        <ringGeometry args={[0.52, 0.60, 48]} />
-      </mesh>
-      {spokes.map((s, i) => (
-        <mesh key={i} material={mat} position={[s.x, s.y, 0]} rotation={[0, 0, s.angle]}>
-          <boxGeometry args={[0.055, 1.38, 0.003]} />
+    <group position={[0, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      {rays.map((r, i) => (
+        <mesh key={i} material={mat} position={[r.x, r.y, 0]} rotation={[0, 0, r.angle]}>
+          <boxGeometry args={[r.len, r.w, 0.004]} />
         </mesh>
       ))}
-      {/* 8 small diamond accents at outer ring */}
-      {spokes.map((s, i) => (
-        <mesh key={`d${i}`} material={mat} position={[Math.cos(s.angle + Math.PI/8) * 2.91, Math.sin(s.angle + Math.PI/8) * 2.91, 0]} rotation={[0, 0, s.angle + Math.PI/4]}>
-          <boxGeometry args={[0.08, 0.08, 0.003]} />
+      {ticks.map((t, i) => (
+        <mesh key={`t${i}`} material={mat} position={[t.x, t.y, 0]} rotation={[0, 0, t.angle + Math.PI / 4]}>
+          <boxGeometry args={[0.06, 0.06, 0.004]} />
         </mesh>
       ))}
+      {/* Small centre rosette */}
+      <mesh material={mat}><ringGeometry args={[0.26, 0.30, 40]} /></mesh>
+      <mesh material={mat}><circleGeometry args={[0.07, 20]} /></mesh>
     </group>
   )
 }

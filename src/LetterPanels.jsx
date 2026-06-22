@@ -338,10 +338,17 @@ export default function LetterPanels() {
       <group ref={headerRef} position={[0, 4.7, -6.0]}>
         <Html transform center distanceFactor={6.2} pointerEvents="none" zIndexRange={[30, 0]}>
           <div style={{
+            position: 'relative',
             width: '500px', textAlign: 'center', userSelect: 'none', pointerEvents: 'none',
             opacity: headerShown ? 1 : 0, transform: headerShown ? 'none' : 'translateY(-18px)',
             transition: 'opacity 1.4s ease, transform 1.4s ease',
           }}>
+            {/* Soft luminous halo behind the title */}
+            <div style={{
+              position: 'absolute', top: '-30px', left: '50%', transform: 'translateX(-50%)',
+              width: '560px', height: '300px', zIndex: -1, pointerEvents: 'none', filter: 'blur(6px)',
+              background: 'radial-gradient(ellipse at 50% 42%, rgba(201,162,42,0.18) 0%, rgba(124,58,237,0.08) 42%, transparent 70%)',
+            }} />
             {/* Wax seal */}
             <div style={{ width: '52px', height: '52px', borderRadius: '50%', margin: '0 auto 18px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at 35% 32%, #c0392b 0%, #7b0000 100%)', border: '2.5px solid rgba(201,162,42,0.72)', boxShadow: '0 3px 14px rgba(0,0,0,0.55), inset 0 1px 3px rgba(255,255,255,0.12)', userSelect: 'none', pointerEvents: 'none' }}>
               <span style={{ fontFamily: '"Snell Roundhand","Segoe Script",Georgia,serif', fontStyle: 'italic', fontSize: '24px', color: 'rgba(201,162,42,0.95)', lineHeight: 1 }}>D</span>
