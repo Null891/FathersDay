@@ -88,8 +88,8 @@ export default function Polaroids() {
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])
 
   return (
-    <group position={[0, 4.2, -5.0]}>
-      <Html transform center distanceFactor={6} zIndexRange={[60, 0]}>
+    <group position={[0, 3.35, -4.6]}>
+      <Html transform center distanceFactor={5.2} zIndexRange={[60, 0]}>
         <div
           onPointerDown={(e) => e.stopPropagation()}
           style={{

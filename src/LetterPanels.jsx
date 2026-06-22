@@ -39,24 +39,28 @@ function withKeywords(text) {
         key={i}
         style={{
           color: '#d4af37',
+          fontWeight: 600,
           textDecoration: 'underline dotted rgba(212,175,55,0.5)',
           textUnderlineOffset: '3px',
-          cursor: 'default',
-          transition: 'color 0.18s, text-shadow 0.18s',
-          borderRadius: '3px',
-          padding: '0 1px',
+          cursor: 'pointer',
+          transition: 'color 0.18s, text-shadow 0.18s, background 0.18s',
+          borderRadius: '4px',
+          padding: '0 3px',
+          background: 'transparent',
         }}
         onMouseEnter={(e) => {
           roomState.activeKeyword = kw.toLowerCase()
-          e.currentTarget.style.color = '#f5d060'
+          e.currentTarget.style.color = '#f7d873'
           e.currentTarget.style.textShadow = '0 0 10px rgba(245,208,96,0.75), 0 0 22px rgba(212,175,55,0.45)'
           e.currentTarget.style.textDecoration = 'underline solid rgba(245,208,96,0.7)'
+          e.currentTarget.style.background = 'rgba(212,175,55,0.14)'
         }}
         onMouseLeave={(e) => {
           roomState.activeKeyword = null
           e.currentTarget.style.color = '#d4af37'
           e.currentTarget.style.textShadow = ''
           e.currentTarget.style.textDecoration = 'underline dotted rgba(212,175,55,0.5)'
+          e.currentTarget.style.background = 'transparent'
         }}
       >
         {part}
