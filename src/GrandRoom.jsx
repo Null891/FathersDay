@@ -15,14 +15,14 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 // Damped so movement feels like turning a real head, not snapping.
 function RoomLook() {
   const { camera, gl } = useThree()
-  // Start with a gentle upward tilt so the entry view frames the letter panels,
-  // header and dome — not the floor.
-  const s = useRef({ dragging: false, px: 0, py: 0, yaw: 0, pitch: 0.11, tYaw: 0, tPitch: 0.11, velYaw: 0, velPitch: 0 })
+  // Very slight upward tilt so the elevated panels sit nicely in frame — small
+  // enough that the room, balloons and atmosphere stay fully in view.
+  const s = useRef({ dragging: false, px: 0, py: 0, yaw: 0, pitch: 0.05, tYaw: 0, tPitch: 0.05, velYaw: 0, velPitch: 0 })
 
   useEffect(() => {
     camera.position.set(0, 1.6, 0)
     camera.rotation.order = 'YXZ'
-    camera.rotation.set(0.11, 0, 0)
+    camera.rotation.set(0.05, 0, 0)
 
     const el = gl.domElement
     const down = (e) => {
