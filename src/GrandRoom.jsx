@@ -5,6 +5,8 @@ import * as THREE from 'three'
 import LetterPanels from './LetterPanels'
 import Atmosphere from './Atmosphere'
 import RoomParticles from './RoomParticles'
+import Polaroids from './Polaroids'
+import Gramophone, { WindChimes } from './Gramophone'
 import { roomState } from './roomState'
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
@@ -13,7 +15,7 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 // Damped so movement feels like turning a real head, not snapping.
 function RoomLook() {
   const { camera, gl } = useThree()
-  const s = useRef({ dragging: false, px: 0, py: 0, yaw: 0, pitch: 0, tYaw: 0, tPitch: 0 })
+  const s = useRef({ dragging: false, px: 0, py: 0, yaw: 0, pitch: 0, tYaw: 0, tPitch: 0, velYaw: 0, velPitch: 0 })
 
   useEffect(() => {
     camera.position.set(0, 1.6, 0)
@@ -30,8 +32,12 @@ function RoomLook() {
       if (!s.current.dragging) return
       const dx = e.clientX - s.current.px, dy = e.clientY - s.current.py
       s.current.px = e.clientX; s.current.py = e.clientY
+      const prevYaw   = s.current.tYaw
+      const prevPitch = s.current.tPitch
       s.current.tYaw   = clamp(s.current.tYaw   - dx * 0.0022, -Math.PI, Math.PI)
       s.current.tPitch = clamp(s.current.tPitch - dy * 0.0022, -0.35,    0.60)
+      s.current.velYaw   = s.current.tYaw   - prevYaw
+      s.current.velPitch = s.current.tPitch - prevPitch
     }
     el.style.cursor = 'grab'
     el.addEventListener('pointerdown', down)
@@ -47,6 +53,14 @@ function RoomLook() {
 
   useFrame((_, dt) => {
     const c = s.current
+    // Momentum: continue rotating after release, decaying at 88% per frame
+    if (!c.dragging) {
+      c.tYaw   = clamp(c.tYaw   + c.velYaw,   -Math.PI, Math.PI)
+      c.tPitch = clamp(c.tPitch + c.velPitch, -0.35,    0.60)
+      c.velYaw   *= 0.88
+      c.velPitch *= 0.88
+    }
+    roomState.yawVelocity = Math.abs(c.velYaw)
     c.yaw   = THREE.MathUtils.damp(c.yaw,   c.tYaw,   9, dt)
     c.pitch = THREE.MathUtils.damp(c.pitch, c.tPitch, 9, dt)
     camera.rotation.set(c.pitch, c.yaw, 0)
@@ -284,11 +298,13 @@ function AnimatedLighting() {
   const coldMoon    = useMemo(() => new THREE.Color('#8090cc'), [])
   const warmMoon    = useMemo(() => new THREE.Color('#e0c070'), [])
 
-  useFrame((_, dt) => {
-    // Golden hour ramps from 0 once scrollProgress crosses 0.6
+  useFrame(({ clock }, dt) => {
     const sp = roomState.scrollProgress
     const t  = Math.max(0, (sp - 0.6) / 0.4)
     roomState.goldenHourT = t
+
+    // Subtle breathing on uplights (~1.75 Hz) — simulates ambient music reactivity
+    const breathe = Math.sin(clock.elapsedTime * 1.75) * 0.06 + 1.0
 
     if (ambRef.current) {
       ambRef.current.color.lerpColors(coldAmbient, warmAmbient, t)
@@ -296,15 +312,15 @@ function AnimatedLighting() {
     }
     if (upl1.current) {
       upl1.current.color.lerpColors(coldUplight, warmUplight, t)
-      upl1.current.intensity = 24 + t * 22
+      upl1.current.intensity = (24 + t * 22) * breathe
     }
     if (upl2.current) {
       upl2.current.color.lerpColors(coldUplight, warmUplight, t)
-      upl2.current.intensity = 24 + t * 22
+      upl2.current.intensity = (24 + t * 22) * breathe
     }
     if (upl3.current) {
       upl3.current.color.lerpColors(coldUplight, warmUplight, t)
-      upl3.current.intensity = 18 + t * 18
+      upl3.current.intensity = (18 + t * 18) * breathe
     }
     if (moonRef.current) {
       moonRef.current.color.lerpColors(coldMoon, warmMoon, t)
@@ -329,7 +345,7 @@ function AnimatedLighting() {
   )
 }
 
-export default function GrandRoom() {
+export default function GrandRoom({ musicRef }) {
   return (
     <group>
       <RoomLook />
@@ -341,6 +357,11 @@ export default function GrandRoom() {
       <LetterPanels />
       <Atmosphere />
       <RoomParticles />
+      <Polaroids />
+      <WindChimes />
+      <group position={[6.0, 0, -2.5]} rotation={[0, -0.9, 0]}>
+        <Gramophone musicRef={musicRef} />
+      </group>
     </group>
   )
 }

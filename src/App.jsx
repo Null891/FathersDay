@@ -83,7 +83,7 @@ export default function App() {
               <Checkpoint onTrigger={goToRoom} active={entered} />
             </>
           )}
-          {scene === 'room' && <GrandRoom />}
+          {scene === 'room' && <GrandRoom musicRef={musicRef} />}
         </Suspense>
 
         <Effects room={!inTunnel} />
