@@ -50,6 +50,7 @@ const MusicPlayer = forwardRef(function MusicPlayer({ enabled = true }, ref) {
   const [progress,  setProgress]  = useState(0)
   const [duration,  setDuration]  = useState(0)
   const [error,     setError]     = useState(false)
+  const [hovered,   setHovered]   = useState(false)
 
   // Single audio element for the whole session
   useEffect(() => {
@@ -145,13 +146,16 @@ const MusicPlayer = forwardRef(function MusicPlayer({ enabled = true }, ref) {
   return (
     <div
       onPointerDown={(e) => e.stopPropagation()}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
-        position: 'fixed', bottom: '28px', left: '50%', transform: 'translateX(-50%)',
-        zIndex: 50, width: '380px',
+        position: 'fixed', bottom: '24px', right: '24px',
+        zIndex: 50, width: '320px',
+        opacity: hovered || isPlaying ? 1 : 0.6, transition: 'opacity 0.4s ease',
         background: 'linear-gradient(160deg, rgba(28,20,48,0.78), rgba(12,9,22,0.82))',
         backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)',
         border: '1px solid rgba(167,139,250,0.16)', borderRadius: '20px',
-        padding: '18px 22px 16px',
+        padding: '16px 20px 14px',
         boxShadow: '0 18px 50px rgba(0,0,0,0.6), 0 0 40px rgba(124,58,237,0.10), inset 0 1px 0 rgba(255,255,255,0.08)',
         userSelect: 'none', pointerEvents: 'auto',
       }}
